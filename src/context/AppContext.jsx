@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import api from '../api/client';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 
 const AppContext = createContext();
 
@@ -18,7 +18,7 @@ export const AppProvider = ({ children }) => {
   // Estado de autenticação
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [, setPassword] = useState('');
   const [server, setServer] = useState('');
   const [error, setError] = useState('');
 
