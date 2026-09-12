@@ -509,6 +509,15 @@ app.get('/ferias', async (req, res) => {
   }
 });
 
+// Rota de health check
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    authenticated: !!req.session?.username,
+  });
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Backend rodando em http://localhost:${PORT}`);
