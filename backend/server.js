@@ -519,11 +519,26 @@ app.get('/health', (req, res) => {
 });
 
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    /\.vercel\.app$/,  // aceita qualquer subdomínio .vercel.app
-  ],
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ];
+    
+    // Permite qualquer subdomínio .vercel.app
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Bloqueado pelo CORS'));
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(session({
