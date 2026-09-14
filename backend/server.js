@@ -518,6 +518,25 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    /\.vercel\.app$/,  // aceita qualquer subdomínio .vercel.app
+  ],
+  credentials: true,
+}));
+
+app.use(session({
+  secret: 'maximo-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: true,        // true porque a Render usa HTTPS
+    sameSite: 'none',    // necessário para cookies cross-domain
+    httpOnly: true,
+  },
+}));
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Backend rodando em http://localhost:${PORT}`);
