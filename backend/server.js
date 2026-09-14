@@ -7,15 +7,37 @@ const PORT = process.env.PORT || 3001;
 const https = require('https');
 
 app.use(cors({
-  origin: 'http://localhost:3000', // URL do seu React
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ];
+
+    // Permite qualquer subdomínio .vercel.app
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Bloqueado pelo CORS'));
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json());
-app.use(session({
+
+app.use(session({ 
   secret: 'maximo-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // se usar HTTPS, mude para true
+  cookie: {
+    secure: true,        // true porque a Render usa HTTPS
+    sameSite: 'none',    // necessário para cookies cross-domain
+    httpOnly: true,
+  },
 }));
 
 // Rota de autenticação
@@ -518,39 +540,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Permite requisições sem origin (ex: Postman, curl)
-    if (!origin) return callback(null, true);
-    
-    // Lista de origens permitidas
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ];
-    
-    // Permite qualquer subdomínio .vercel.app
-    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    return callback(new Error('Bloqueado pelo CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-app.use(session({
-  secret: 'maximo-secret-key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: true,        // true porque a Render usa HTTPS
-    sameSite: 'none',    // necessário para cookies cross-domain
-    httpOnly: true,
-  },
-}));
 
 // Inicia o servidor
 app.listen(PORT, () => {
