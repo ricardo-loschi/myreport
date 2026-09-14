@@ -6,6 +6,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const https = require('https');
 
+// 1. Trust proxy (necessário para Render)
+app.set('trust proxy', 1);
+
+// 2. CORS (antes de tudo)
 app.use(cors({
   origin: (origin, callback) => {
     // Permite requisições sem origin (ex: Postman, curl)
@@ -29,6 +33,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+
+// 3. Body parser (ANTES das rotas!)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 4. Session
 app.use(session({ 
   secret: 'maximo-secret-key',
   resave: false,
@@ -40,8 +50,9 @@ app.use(session({
   },
 }));
 
-// Rota de autenticação
+// 5. Rota de autenticação
 app.post('/auth', async (req, res) => {
+  console.log('📥 Body recebido:', req.body); // <-- log para depura
   const { username, password, server } = req.body;
   if (!username || !password || !server) {
     return res.status(400).json({ error: 'Dados incompletos' });
